@@ -368,7 +368,6 @@ void loop() {
         if (SwitchState4 != LSwitchState4)
         {
             display.clearDisplay();
-            buf[0] = 226;
             buf[2] = 6;
             Serial.write(buf, 8);
             releaseKey();
@@ -382,7 +381,6 @@ void loop() {
         if (SwitchState4 != LSwitchState4)
         {
             display.clearDisplay();
-            buf[0] = 226;
             buf[2] = 6;
             Serial.write(buf, 8);
             releaseKey();
@@ -460,13 +458,13 @@ void loop() {
             switch (NAVMODESATE)
             {
             case 0:
-                SCAN();
+                FLIGHT();
                 delay(1000);
                 display.clearDisplay();
                 NAVMODESATE = 1;
             break;
             case 1:
-                FLIGHT();
+                SCAN();
                 delay(1000);
                 display.clearDisplay();
                 NAVMODESATE = 2;
