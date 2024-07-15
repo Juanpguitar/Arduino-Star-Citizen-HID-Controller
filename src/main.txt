@@ -1,15 +1,9 @@
-#include <Arduino.h>
-#include <SPI.h>
-#include <Wire.h>
-#include <Adafruit_GFX.h>
-#include <Adafruit_SSD1306.h>
-#include <BleGamepad.h>
-
 #define OLED_RESET 4 
 Adafruit_SSD1306 display(OLED_RESET);
 
 uint8_t buf[8]= {0};
-int Ins[] = {2, 4, 5, 18, 19, 34, 35, 32, 33};
+int Out[] = {25};
+int Ins[] = {2, 4, 5, 18, 19, 33, 32, 35, 34};
 int SwitchState0 = 0;
 int SwitchState1 = 0;
 int SwitchState2 = 0;
@@ -28,19 +22,25 @@ int MODESTATE = 0;
 int SCMMODESATE = 0;
 int NAVMODESATE = 0;
 
-BleGamepad bleGamepad;
-
 void setup() {
+    Serial.begin(9600);
     display.begin(SSD1306_SWITCHCAPVCC, 0x3C);
     display.clearDisplay();
-    bleGamepad.begin();
+
+    pinMode(Out[0], OUTPUT);
 
     for (int i; i < 10; i++)
     {
         pinMode(Ins[i], INPUT);
     }
+    digitalWrite(Out[0], HIGH);
 }
 
+void releaseKey() {
+    buf[0] = 0;
+    buf[2] = 0;
+    Serial.write(buf, 8);
+}
 void SystemsReady() {
     display.setTextSize(2);
     display.setTextColor(WHITE);
@@ -223,11 +223,11 @@ void loop() {
     SwitchState1 = digitalRead(Ins[1]);
     SwitchState2 = digitalRead(Ins[2]);
     SwitchState3 = digitalRead(Ins[3]);
-    SwitchState4 = digitalRead(Ins[4]);
-    ButtonState0 = digitalRead(Ins[5]);
-    ButtonState1 = digitalRead(Ins[6]);
-    ButtonState2 = digitalRead(Ins[7]);
-    ButtonState3 = digitalRead(Ins[8]);
+    SwitchState4 = digitalRead(Ins[8]);
+    ButtonState0 = digitalRead(Ins[4]);
+    ButtonState1 = digitalRead(Ins[5]);
+    ButtonState2 = digitalRead(Ins[6]);
+    ButtonState3 = digitalRead(Ins[7]);
 
     SystemsReady();
 
@@ -237,11 +237,12 @@ void loop() {
         if (SwitchState0 != LSwitchState0)
         {
             display.clearDisplay();
+            buf[2] = 12;
+            Serial.write(buf, 8);
+            releaseKey();
+            digitalWrite(Out[0], HIGH);
             EnginesOff();
-            bleGamepad.press(BUTTON_1);
-            delay(500);
-            bleGamepad.release(BUTTON_1);
-            delay(500);
+            delay(1000);
             display.clearDisplay();
             LSwitchState0 = SwitchState0;
         }
@@ -250,17 +251,19 @@ void loop() {
         if (SwitchState0 != LSwitchState0)
         {
             display.clearDisplay();
+            buf[2] = 12;
+            Serial.write(buf, 8);
+            releaseKey();
+            buf[0] = 230;
+            digitalWrite(Out[0], LOW);
+            buf[2] = 21;
+            Serial.write(buf, 8);
+            releaseKey();
             FlightReady();
-            bleGamepad.press(BUTTON_1);
-            delay(500);
-            bleGamepad.release(BUTTON_1);
-            delay(500);
+            delay(1000);
             display.clearDisplay();
             EnginesOnline();
-            bleGamepad.press(BUTTON_2);
-            delay(500);
-            bleGamepad.release(BUTTON_2);
-            delay(500);
+            delay(1000);
             display.clearDisplay();
             LSwitchState0 = SwitchState0;
         }
@@ -272,11 +275,11 @@ void loop() {
         if (SwitchState1 != LSwitchState1)
         {
             display.clearDisplay();
+            buf[2] = 17;
+            Serial.write(buf, 8);
+            releaseKey();
             LandingDown();
-            bleGamepad.press(BUTTON_3);
-            delay(500);
-            bleGamepad.release(BUTTON_3);
-            delay(500);
+            delay(1000);
             display.clearDisplay();  
             LSwitchState1 = SwitchState1;
         }
@@ -285,11 +288,11 @@ void loop() {
         if (SwitchState1 != LSwitchState1)
         {
             display.clearDisplay();
+            buf[2] = 17;
+            Serial.write(buf, 8);
+            releaseKey();
             LandingUp();
-            bleGamepad.press(BUTTON_3);
-            delay(500);
-            bleGamepad.release(BUTTON_3);
-            delay(500);
+            delay(1000);
             display.clearDisplay();
             LSwitchState1 = SwitchState1;
         }
@@ -301,11 +304,11 @@ void loop() {
         if (SwitchState2 != LSwitchState2)
         {
             display.clearDisplay();
+            buf[2] = 15;
+            Serial.write(buf, 8);
+            releaseKey();
             LightsOff();
-            bleGamepad.press(BUTTON_4);
-            delay(500);
-            bleGamepad.release(BUTTON_4);
-            delay(500);
+            delay(1000);
             display.clearDisplay();
             LSwitchState2 = SwitchState2;
         }
@@ -314,11 +317,11 @@ void loop() {
         if (SwitchState2 != LSwitchState2)
         {
             display.clearDisplay();
+            buf[2] = 15;
+            Serial.write(buf, 8);
+            releaseKey();
             LightsOn();
-            bleGamepad.press(BUTTON_4);
-            delay(500);
-            bleGamepad.release(BUTTON_4);
-            delay(500);
+            delay(1000);
             display.clearDisplay();  
             LSwitchState2 = SwitchState2;
         }
@@ -330,11 +333,11 @@ void loop() {
         if (SwitchState3 != LSwitchState3)
         {
             display.clearDisplay();
+            buf[2] = 14;
+            Serial.write(buf, 8);
+            releaseKey();
             VTOLOff();
-            bleGamepad.press(BUTTON_5);
-            delay(500);
-            bleGamepad.release(BUTTON_5);
-            delay(500);
+            delay(1000);
             display.clearDisplay();
             LSwitchState3 = SwitchState3;
         }
@@ -342,12 +345,12 @@ void loop() {
     case 1:
         if (SwitchState3 != LSwitchState3)
         {
-            display.clearDisplay();;
+            display.clearDisplay();
+            buf[2] = 14;
+            Serial.write(buf, 8);
+            releaseKey();
             VTOLOn();
-            bleGamepad.press(BUTTON_5);
-            delay(500);
-            bleGamepad.release(BUTTON_5);
-            delay(500);
+            delay(1000);
             display.clearDisplay();  
             LSwitchState3 = SwitchState3;
         }
@@ -359,11 +362,11 @@ void loop() {
         if (SwitchState4 != LSwitchState4)
         {
             display.clearDisplay();
+            buf[2] = 6;
+            Serial.write(buf, 8);
+            releaseKey();
             CruiseOff();
-            bleGamepad.press(BUTTON_6);
-            delay(500);
-            bleGamepad.release(BUTTON_6);
-            delay(500);
+            delay(1000);
             display.clearDisplay();
             LSwitchState4 = SwitchState4;
         }
@@ -372,11 +375,11 @@ void loop() {
         if (SwitchState4 != LSwitchState4)
         {
             display.clearDisplay();
+            buf[2] = 6;
+            Serial.write(buf, 8);
+            releaseKey();
             CruiseOn();
-            bleGamepad.press(BUTTON_6);
-            delay(500);
-            bleGamepad.release(BUTTON_6);
-            delay(500);
+            delay(1000);
             display.clearDisplay();
             LSwitchState4 = SwitchState4;
         }
@@ -386,16 +389,16 @@ void loop() {
     {
     case 1:
         display.clearDisplay();
+        buf[2] = 5;
+        Serial.write(buf, 8);
+        releaseKey();
         if (MODESTATE == 0)
         {
             NAVMode();
-            bleGamepad.press(BUTTON_7);
-            delay(500);
-            bleGamepad.release(BUTTON_7);
-            delay(500);
+            delay(1000);
             display.clearDisplay();
             QTM();
-            delay(500);
+            delay(1000);
             display.clearDisplay();
             MODESTATE = 1;
             NAVMODESATE = 0;
@@ -403,13 +406,10 @@ void loop() {
         else
         {
             SCMMode();
-            bleGamepad.press(BUTTON_7);
-            delay(500);
-            bleGamepad.release(BUTTON_7);
-            delay(500);
+            delay(1000);
             display.clearDisplay();
             WEAPONS();
-            delay(500);
+            delay(1000);
             display.clearDisplay();
             MODESTATE = 0;
             SCMMODESATE = 0;
@@ -420,34 +420,28 @@ void loop() {
     {
     case 1:
         display.clearDisplay();
+        buf[2] = 49;
+        Serial.write(buf, 8);
+        releaseKey();
         if (MODESTATE == 0)
         {
             switch (SCMMODESATE)
             {
             case 0:
                 MSL();
-                bleGamepad.press(BUTTON_8);
-                delay(500);
-                bleGamepad.release(BUTTON_8);
-                delay(500);
+                delay(1000);
                 display.clearDisplay();
                 SCMMODESATE = 1;
             break;
             case 1:
                 UTIL();
-                bleGamepad.press(BUTTON_8);
-                delay(500);
-                bleGamepad.release(BUTTON_8);
-                delay(500);
+                delay(1000);
                 display.clearDisplay();
                 SCMMODESATE = 2;
             break;
             case 2:
                 WEAPONS();
-                bleGamepad.press(BUTTON_8);
-                delay(500);
-                bleGamepad.release(BUTTON_8);
-                delay(500);
+                delay(1000);
                 display.clearDisplay();
                 SCMMODESATE = 0;
             break;
@@ -459,28 +453,19 @@ void loop() {
             {
             case 0:
                 FLIGHT();
-                bleGamepad.press(BUTTON_8);
-                delay(500);        
-                bleGamepad.release(BUTTON_8);
-                delay(500);
+                delay(1000);
                 display.clearDisplay();
                 NAVMODESATE = 1;
             break;
             case 1:
                 SCAN();
-                bleGamepad.press(BUTTON_8);
-                delay(500);
-                bleGamepad.release(BUTTON_8);
-                delay(500);
+                delay(1000);
                 display.clearDisplay();
                 NAVMODESATE = 2;
             break;
             case 2:
                 QTM();
-                bleGamepad.press(BUTTON_8);
-                delay(500);                
-                bleGamepad.release(BUTTON_8);
-                delay(500);
+                delay(1000);
                 display.clearDisplay();
                 NAVMODESATE = 0;
             break;
@@ -493,11 +478,11 @@ void loop() {
     {
     case 1:
         display.clearDisplay();
+        buf[2] = 11;
+        Serial.write(buf, 8);
+        releaseKey();
         FLARE();
-        bleGamepad.press(BUTTON_9);
-        delay(250);
-        bleGamepad.release(BUTTON_9);
-        delay(250);
+        delay(500);
         display.clearDisplay();    
     break;
     }
@@ -505,12 +490,13 @@ void loop() {
     {
     case 1:
         display.clearDisplay();
+        buf[2] = 13; 
+        Serial.write(buf, 8);
+        releaseKey();
         NOISE();
-        bleGamepad.press(BUTTON_10);
-        delay(250);
-        bleGamepad.release(BUTTON_10);
-        delay(250);
+        delay(500);
         display.clearDisplay();
     break;
     }
 }
+
